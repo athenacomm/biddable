@@ -25,13 +25,13 @@ with open('/tmp/creds.json', 'w') as f:
     f.write(creds_json)
 
 gauth = GoogleAuth()
-gauth.LoadServiceConfigFile('/tmp/creds.json')
+gauth.LoadClientConfigFile('/tmp/creds.json')  # ✅ fixed method name
 gauth.ServiceAuth()
 drive = GoogleDrive(gauth)
 
 upload_file = drive.CreateFile({
     "title": f"cf_raw_{file_stamp}.csv",
-    "parents": [{"id": "1TTXl47cS3TAktsu3Vby-4gTkbrJ_-1hQ"}]  # Your public folder ID
+    "parents": [{"id": "1TTXl47cS3TAktsu3Vby-4gTkbrJ_-1hQ"}]
 })
 upload_file.SetContentFile(raw_path)
 upload_file.Upload()

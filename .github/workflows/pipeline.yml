@@ -2,8 +2,8 @@ name: Daily Contracts Finder Pipeline
 
 on:
   schedule:
-    - cron: '0 7 * * *'  # runs every day at 7am UTC
-  workflow_dispatch:     # allows manual trigger from GitHub UI
+    - cron: '59 22 * * *'  # 11:59pm UK time (22:59 UTC during BST)
+  workflow_dispatch:       # allows manual run from GitHub UI
 
 jobs:
   run:

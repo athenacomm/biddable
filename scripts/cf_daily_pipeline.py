@@ -19,14 +19,16 @@ with open(raw_path, "wb") as f:
     f.write(response.content)
 print(f"✅ Downloaded raw CSV to: {raw_path}")
 
-# --- Google Drive Upload ---
+# --- Google Drive Upload using Service Account ---
 creds_json = os.environ['GDRIVE_CREDENTIALS_JSON']
-with open('/tmp/creds.json', 'w') as f:
+creds_path = '/tmp/creds.json'
+
+with open(creds_path, 'w') as f:
     f.write(creds_json)
 
 gauth = GoogleAuth()
-gauth.LoadClientConfigFile('/tmp/creds.json')  # ✅ fixed method name
-gauth.ServiceAuth()
+gauth.auth_method = 'service'
+gauth.credentials = gauth.LoadServiceAccountCredentials(creds_path)
 drive = GoogleDrive(gauth)
 
 upload_file = drive.CreateFile({

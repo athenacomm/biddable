@@ -6,26 +6,27 @@ import requests
 from datetime import datetime
 from supabase import create_client
 
-# --- Supabase Setup ---
+# Supabase init
 SUPABASE_URL = os.environ["SUPABASE_URL"]
 SUPABASE_KEY = os.environ["SUPABASE_KEY"]
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# --- Date Setup ---
-today = datetime.today().strftime('%Y/%m/%d')       # For the URL
-today_dash = datetime.today().strftime('%Y-%m-%d')  # For file names
+# Date setup
+today = datetime.today()
+url_date = today.strftime("%Y/%m/%d")
+file_stamp = today.strftime("%Y-%m-%d")
 
-# --- Download CSV ---
-url = f"https://www.contractsfinder.service.gov.uk/Harvester/Notices/Data/CSV/{today}"
+# Download CSV
+url = f"https://www.contractsfinder.service.gov.uk/Harvester/Notices/Data/CSV/{url_date}"
 response = requests.get(url)
 response.raise_for_status()
 
-# Save raw file temporarily
-raw_path = f"/tmp/cf_raw_{today_dash}.csv"
+# Save to /tmp
+raw_path = f"/tmp/cf_raw_{file_stamp}.csv"
 with open(raw_path, "wb") as f:
     f.write(response.content)
 
-# --- Define fields to extract ---
+# Define columns
 columns_to_keep = {
     "publishedDate": "published_date",
     "releases/0/tender/title": "tender_title",
@@ -39,29 +40,16 @@ columns_to_keep = {
     "releases/0/buyer/name": "buyer_name",
     "releases/0/tender/suitability/sme": "sme_friendly",
     "releases/0/tender/suitability/vcse": "vcse_friendly",
-    "releases/0/title": "notice_title",
-    "Source File": "source_file"
+    "releases/0/title": "notice_title"
 }
 
-# --- Read and clean data ---
+# Clean + upload
 df = pd.read_csv(raw_path, low_memory=False)
-
-# Filter columns and rename
 df_cleaned = df[list(columns_to_keep.keys())].rename(columns=columns_to_keep)
+df_cleaned.insert(0, "primary_key", [''.join(random.choices(string.ascii_uppercase + string.digits, k=5)) for _ in range(len(df_cleaned))])
 
-# Add unique primary key
-def generate_key():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-
-df_cleaned.insert(0, "primary_key", [generate_key() for _ in range(len(df_cleaned))])
-
-# --- Upload to Supabase ---
-print(f"Uploading {len(df_cleaned)} rows to Supabase...")
-
+# Upload
 for row in df_cleaned.to_dict(orient="records"):
     supabase.table("frameworks").insert(row).execute()
 
-print("✅ Upload complete.")
-
-
-print(f"✅ Uploaded {len(records)} cleaned records to Supabase.")
+print(f"✅ Uploaded {len(df_cleaned)} records from {file_stamp}")

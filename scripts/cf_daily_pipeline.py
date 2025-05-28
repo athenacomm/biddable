@@ -26,9 +26,14 @@ creds_path = '/tmp/creds.json'
 with open(creds_path, 'w') as f:
     f.write(creds_json)
 
-gauth = GoogleAuth()
-gauth.auth_method = 'service'
-gauth.credentials = gauth.LoadServiceAccountCredentials(creds_path)
+gauth = GoogleAuth(settings_file=None)  # no settings.yaml file required
+gauth.LoadServiceConfigSettings({
+    "client_config_backend": "service",
+    "service_config": {
+        "client_service_account": creds_path
+    }
+})
+gauth.ServiceAuth()
 drive = GoogleDrive(gauth)
 
 upload_file = drive.CreateFile({

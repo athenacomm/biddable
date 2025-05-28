@@ -2,7 +2,7 @@ name: Daily Contracts Finder Pipeline
 
 on:
   schedule:
-    - cron: '59 22 * * *'  # 11:59pm UK time (22:59 UTC during BST)
+    - cron: '59 22 * * *'  # 11:59pm UK time
   workflow_dispatch:
 
 jobs:
@@ -24,8 +24,6 @@ jobs:
 
       - name: Run pipeline
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GDRIVE_CREDENTIALS_JSON: ${{ secrets.GDRIVE_CREDENTIALS_JSON }}
         run: |
           python scripts/cf_daily_pipeline.py

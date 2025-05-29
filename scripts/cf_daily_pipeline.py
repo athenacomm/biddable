@@ -18,8 +18,14 @@ creds_path = '/tmp/creds.json'
 with open(creds_path, 'w') as f:
     f.write(creds_json)
 
-gauth = GoogleAuth()
-gauth.LoadCredentialsFile(creds_path)
+gauth = GoogleAuth(settings_file=None)
+gauth.LoadServiceConfigSettings({
+    "client_config_backend": "service",
+    "service_config": {
+        "client_service_account": creds_path
+    }
+})
+gauth.ServiceAuth()
 drive = GoogleDrive(gauth)
 
 # --- Find the most recent file ---

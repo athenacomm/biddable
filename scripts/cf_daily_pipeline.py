@@ -19,12 +19,14 @@ with open(creds_path, 'w') as f:
     f.write(creds_json)
 
 gauth = GoogleAuth(settings_file=None)
-gauth.LoadServiceConfigSettings({
-    "client_config_backend": "service",
-    "service_config": {
-        "client_service_account": creds_path
+gauth.LoadServiceConfigSettings(
+    settings={
+        "client_config_backend": "service",
+        "service_config": {
+            "client_service_account": creds_path
+        }
     }
-})
+)
 gauth.ServiceAuth()
 drive = GoogleDrive(gauth)
 
